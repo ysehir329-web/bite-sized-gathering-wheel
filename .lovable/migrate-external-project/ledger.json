@@ -1,0 +1,11 @@
+[
+ {"capability":"code","source":"GitHub basaripanel19-eng/morsel-meetup-wheel (/, /menu, /dashboard, /auth, Şans Çarkı, photo route, cark.html, tests)","outcome":"copy","status":"verified","next_action":"none"},
+ {"capability":"schema","source":"menu_categories, menu_items, menu_reviews, guest_comments, wheel_settings, wheel_wins, wheel_spins, wheel_ip_spins, wheel_claims, admin_pin_attempts, spin_wheel(), spin_wheel_guest()","outcome":"migrate","status":"verified","next_action":"none"},
+ {"capability":"records","source":"Default menu + wheel seeded by migration; live edits/comments/prize codes in the old database are not in the repository","outcome":"migrate","status":"pending","next_action":"Ask user for CSV exports or skip"},
+ {"capability":"auth","source":"None (passwordless dashboard)","outcome":"not needed","status":"accepted","next_action":"none"},
+ {"capability":"authorization","source":"Public read on menu/wheel settings, anon insert-only comments, management via server","outcome":"migrate","status":"verified","next_action":"none"},
+ {"capability":"file storage","source":"Private menu-photos bucket","outcome":"migrate","status":"partial","next_action":"Bucket created; photos uploaded in the old app must be re-uploaded"},
+ {"capability":"assets","source":"Ummasbun logo","outcome":"re-upload","status":"verified","next_action":"none"},
+ {"capability":"QR cutover","source":"QR hidden in editor until this project is published","outcome":"cutover","status":"pending","next_action":"Publish; QR then targets <published>/menu"},
+ {"capability":"verification","source":"tests 32/32, dashboard, guest menu, wheel config+spin, product toggle persisted","outcome":"verify","status":"verified","next_action":"none"}
+]

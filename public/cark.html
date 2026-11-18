@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lucky Wheel</title>
+<style>
+:root{--bg:#fff7ec;--card:#ffffff;--ink:#2b1d14;--mute:#7a6555;--acc:#d9480f;--acc2:#2f9e44;--line:#f0dfc8;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1d1510;--card:#2a1d15;--ink:#fbeedd;--mute:#c4a88f;--line:#4a3426}}
+:root[data-theme="dark"]{--bg:#1d1510;--card:#2a1d15;--ink:#fbeedd;--mute:#c4a88f;--line:#4a3426}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+header{text-align:center;padding:28px 16px 8px}
+h1{margin:0;font-size:1.9rem}
+header p{margin:6px 0 0;color:var(--mute)}
+main{max-width:640px;margin:0 auto;padding:12px 16px 40px}
+section{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:20px;margin-top:18px}
+.wheelbox{position:relative;width:min(88vw,340px);margin:8px auto}
+canvas{width:100%;height:auto;display:block}
+.pin{position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:32px solid #d9480f;filter:drop-shadow(0 2px 2px rgba(0,0,0,.4));z-index:2}
+.btn{display:block;width:100%;max-width:340px;margin:14px auto 0;border:0;border-radius:999px;padding:14px;font-size:1.1rem;font-weight:700;color:#fff;background:var(--acc);cursor:pointer}
+.btn:disabled{opacity:.6}
+.btn.green{background:var(--acc2)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+#modal.show{display:flex}
+.box{background:var(--card);border-radius:24px;padding:26px 22px;max-width:360px;width:100%;text-align:center;animation:pop .4s}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.prize{font-size:1.5rem;font-weight:800;margin:6px 0}
+.link{display:block;margin-top:10px;color:var(--mute);background:none;border:0;cursor:pointer;width:100%;font-size:.95rem}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="ttl">🎡</h1>
+  <p id="sub"></p>
+</header>
+<main>
+  <section>
+    <div class="wheelbox"><div class="pin"></div><canvas id="w" width="680" height="680"></canvas></div>
+    <button class="btn" id="spin" disabled>…</button>
+  </section>
+</main>
+
+<canvas id="cf" style="position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:12"></canvas>
+<div id="modal"><div class="box">
+  <div id="pe" style="font-size:4.5rem;line-height:1.2;text-align:center"></div>
+  <div id="m1">Congratulations! You won:</div>
+  <div class="prize" id="pt"></div>
+  <div id="pcb" style="display:none;margin-top:10px;padding:12px;border-radius:16px;background:var(--bg)"><div style="color:var(--mute);font-size:.9rem">Your prize code</div><div id="pc" style="font-family:ui-monospace,monospace;font-size:2.2rem;font-weight:800;letter-spacing:.2em"></div><div style="color:var(--mute);font-size:.9rem">Valid today only — show this code at the counter.</div></div>
+  <button class="link" id="close">Close</button>
+</div></div>
+
+<script>
+// Wheel settings are edited in the management panel (/dashboard → Çark) and
+// loaded from the server; the server also picks the prize so daily limits hold for everyone.
+var P=[],MAX=0,READY=false;
+var $=function(x){return document.getElementById(x);};
+function day(){var d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();}
+function cnt(){try{var o=JSON.parse(localStorage.getItem("carkspin")||"{}");return o.d===day()?o.n:0;}catch(e){return 0;}}
+// The server counts spins per device; this saved count only drives the button text.
+function mark(n){try{localStorage.setItem("carkspin",JSON.stringify({d:day(),n:n}));}catch(e){}}
+function full(){return MAX>0&&cnt()>=MAX;}
+function lockUI(){var b=$("spin"),on=full();b.disabled=on||!READY;b.textContent=!READY?"…":on?"Out of spins, come back tomorrow":(MAX>0?"SPIN! ("+(MAX-cnt())+" left)":"SPIN!");}
+function boom(){var c=$("cf"),x=c.getContext("2d"),W=c.width=innerWidth,H=c.height=innerHeight,ps=[],cols=["#f03e3e","#fab005","#40c057","#228be6","#be4bdb","#fd7e14"],s,i;
+ for(s=0;s<3;s++)for(i=0;i<70;i++){var a=-Math.PI/2+(Math.random()-.5)*1.5,v=9+Math.random()*10;ps.push({x:W*(.2+s*.3),y:H*.7,vx:Math.cos(a)*v,vy:Math.sin(a)*v,w:6+Math.random()*6,h:4+Math.random()*6,r:Math.random()*6,vr:(Math.random()-.5)*.4,c:cols[(i+s)%6]});}
+ var t0=performance.now();(function f(n){x.clearRect(0,0,W,H);ps.forEach(function(p){p.vy+=.28;p.vx*=.99;p.x+=p.vx;p.y+=p.vy;p.r+=p.vr;x.save();x.translate(p.x,p.y);x.rotate(p.r);x.fillStyle=p.c;x.fillRect(-p.w/2,-p.h/2,p.w,p.h);x.restore();});if(n-t0<3500)requestAnimationFrame(f);else x.clearRect(0,0,W,H);})(t0);}
+var cv=$("w"),cx=cv.getContext("2d"),rot=0,busy=false;
+function lab(p){
+ var w=p.t.split(" "),l;
+ if(w[0]=="Free")l=[w[0],w.slice(1).join(" ")];else if(w.length>2)l=[w[0]+" "+w[1],w.slice(2).join(" ")];else l=w;
+ cx.save();cx.translate(292,0);cx.rotate(Math.PI/2);cx.font="46px system-ui,sans-serif";cx.textAlign="center";cx.textBaseline="middle";cx.fillText(p.e,0,3);cx.restore();
+ cx.save();cx.textAlign="right";cx.textBaseline="middle";cx.fillStyle="#fff";cx.shadowColor="rgba(0,0,0,.35)";cx.shadowBlur=3;
+ var f=26;do{cx.font="700 "+f+"px system-ui,sans-serif";f--;}while(f>14&&Math.max(cx.measureText(l[0]).width,cx.measureText(l[1]||"").width)>140);
+ cx.fillText(l[0],246,l[1]?-15:0);if(l[1])cx.fillText(l[1],246,15);
+ cx.restore();
+}
+function draw(){
+ var s=cv.width,r=s/2,N=P.length,arc=Math.PI*2/Math.max(N,1);cx.clearRect(0,0,s,s);
+ for(var i=0;i<N;i++){
+  var a=rot+i*arc;
+  cx.beginPath();cx.moveTo(r,r);cx.arc(r,r,r-8,a,a+arc);cx.closePath();
+  cx.fillStyle=P[i].c;cx.fill();cx.strokeStyle="#fff";cx.lineWidth=4;cx.stroke();
+  cx.save();cx.translate(r,r);cx.rotate(a+arc/2);cx.textAlign="right";cx.fillStyle="#fff";
+  lab(P[i]);
+  cx.restore();
+ }
+ cx.beginPath();cx.arc(r,r,34,0,7);cx.fillStyle="#fff";cx.fill();cx.strokeStyle="#d9480f";cx.lineWidth=6;cx.stroke();
+}
+function spin(){
+ if(busy||!READY)return;if(full()){lockUI();return;}busy=true;$("spin").disabled=true;
+ fetch("/api/public/wheel-spin",{method:"POST"}).then(function(r){return r.json().catch(function(){return {};}).then(function(b){
+  if(r.status===429&&b.error==="device_limit"){mark(MAX);return null;}if(!r.ok)throw 0;return b;});}).then(function(res){
+  if(!res){busy=false;lockUI();return;}
+  var w=res.index;if(typeof w!=="number"||!P[w])throw 0;mark(typeof res.used==="number"?res.used:cnt()+1);
+  var arc=Math.PI*2/P.length,want=3*Math.PI/2-(w+0.5)*arc;
+  var cur=((rot%(2*Math.PI))+2*Math.PI)%(2*Math.PI);
+  var d=((want-cur)%(2*Math.PI)+2*Math.PI)%(2*Math.PI)+Math.PI*2*6;
+  var start=rot,t0=performance.now(),dur=5000;
+  (function f(n){var k=Math.min(1,(n-t0)/dur),e=1-Math.pow(1-k,4);rot=start+d*e;draw();
+   if(k<1)requestAnimationFrame(f);else{busy=false;lockUI();win(w,res.code);}})(t0);
+ }).catch(function(){busy=false;lockUI();$("pcb").style.display="none";$("pe").textContent="⚠️";$("m1").textContent="";$("pt").textContent="Please try again.";$("modal").classList.add("show");});
+}
+function win(i,code){
+ var p=P[i],em=!!p.x;
+ $("pc").textContent=code||"";$("pcb").style.display=!em&&code?"block":"none";
+ $("pe").textContent=p.e;
+ $("m1").textContent=em?"Not this time":"Congratulations! You won:";
+ $("pt").textContent=em?"Better luck next time!":p.t;
+ if(!em)boom();
+ $("modal").classList.add("show");
+}
+$("spin").onclick=spin;
+$("close").onclick=function(){$("modal").classList.remove("show");};
+fetch("/api/public/wheel-config").then(function(r){return r.json();}).then(function(c){
+ P=c.prizes||[];MAX=c.max_spins||0;$("ttl").textContent=c.title||"🎡";$("sub").textContent=c.subtitle||"";
+ READY=P.length>0;draw();lockUI();
+}).catch(function(){$("sub").textContent="Could not load the wheel.";});
+</script>
+</body>
+</html>
