@@ -28,6 +28,20 @@ describe("prize codes", () => {
 describe("spin limit", () => {
   beforeEach(() => rpc.mockReset());
 
+  it.each([
+    ["cf-connecting-ip", { "cf-connecting-ip": "192.0.2.10", "x-nf-client-connection-ip": "192.0.2.20", "x-real-ip": "192.0.2.30", "x-forwarded-for": "192.0.2.40" }, "192.0.2.10"],
+    ["x-nf-client-connection-ip", { "x-nf-client-connection-ip": "192.0.2.20", "x-real-ip": "192.0.2.30", "x-forwarded-for": "192.0.2.40" }, "192.0.2.20"],
+    ["x-real-ip", { "x-real-ip": "192.0.2.30", "x-forwarded-for": "192.0.2.40" }, "192.0.2.30"],
+    ["x-forwarded-for", { "x-forwarded-for": "192.0.2.40, 192.0.2.50" }, "192.0.2.40"],
+  ] as const)("applies the IP limit using %s in priority order", async (_, headers, ip) => {
+    rpc.mockResolvedValue({ data: { status: "ip_limit", used: 1 }, error: null });
+    const response = await handleWheelSpin(new Request("https://cafe.test/api/public/wheel-spin", { method: "POST", headers: { ...headers } }));
+    const digest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(ip));
+    const hash = Array.from(new Uint8Array(digest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+    expect(rpc).toHaveBeenCalledWith("spin_wheel_guest", expect.objectContaining({ p_ip: hash }));
+    expect(response.status).toBe(429);
+  });
+
   it("refuses a spin with 429 once the device used its daily spins", async () => {
     rpc.mockResolvedValue({ data: { status: "device_limit", used: 2 }, error: null });
     const response = await handleWheelSpin(new Request("https://cafe.test/api/public/wheel-spin", { method: "POST" }));

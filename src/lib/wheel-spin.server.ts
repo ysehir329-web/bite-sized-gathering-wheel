@@ -20,7 +20,11 @@ function readCookie(header: string | null, name: string): string | undefined {
 export async function handleWheelSpin(request: Request): Promise<Response> {
   const existing = readCookie(request.headers.get("cookie"), DEVICE_COOKIE);
   const device = isDeviceId(existing) ? existing : newDeviceId();
-  const ip = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const ip = request.headers.get("cf-connecting-ip")?.trim()
+    || request.headers.get("x-nf-client-connection-ip")?.trim()
+    || request.headers.get("x-real-ip")?.trim()
+    || request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+    || "unknown";
   const ipHash = await sha256(ip);
   const headers = new Headers({
     "cache-control": "no-store",

@@ -1,26 +1,25 @@
 # Morsel Meetup Menu Wheel
 
-https://github.com/basaripanel19-eng/morsel-and-meetup-market.git lütfen bu github de ki proje mi içere aktar benimle geliştirmeye başla
+## Yayınlama
 
-This project was built with [Lovable](https://lovable.dev).
+- **Lovable:** Projeyi **Publish → Publish changes** ile yayınlayın. `NITRO_PRESET` ayarlamayın; mevcut Lovable/Cloudflare ayarları kullanılır.
+- **Vercel:** Git deposunu içe aktarın, Node.js 22 veya üstünü seçin ve aşağıdaki değişkenleri ekleyin. `vercel.json`, `NITRO_PRESET=vercel` ile derler. Nitro `.vercel/output` içinde hem statik dosyaları hem de sayfaları, sunucu fonksiyonlarını ve `/api/public/*` isteklerini karşılayan yönlendirmeleri üretir.
+- **Netlify:** Git deposunu bağlayın ve aşağıdaki değişkenleri ekleyin. `netlify.toml`, `NITRO_PRESET=netlify` ile derler ve `dist` klasörünü yayımlar. Nitro, diğer istekleri `.netlify/functions-internal` içindeki sunucu fonksiyonuna yönlendirir.
 
-**Live app**: https://morsel-meetup-menu-wheel.lovable.app
+Vercel ve Netlify için `.env.example` dosyasındaki şu değişkenleri ekleyin:
 
-## Build with Lovable
+- `VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`: derleme sırasında kullanılmalı.
+- `SUPABASE_URL`, `SUPABASE_PUBLISHABLE_KEY`, `SUPABASE_SERVICE_ROLE_KEY`: sunucu fonksiyonlarının çalışma ortamında bulunmalı. `SUPABASE_SERVICE_ROLE_KEY` gizlidir; `VITE_` önekiyle eklemeyin ve depoya yazmayın.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/5f9c2708-7bde-481b-bc14-d510cfbeef93).
+Lovable Cloud, yönetilen projenin servis anahtarını dışarı vermez. Harici yayında sunucu özelliklerinin tamamı için aynı şema, veriler ve depolama yapısıyla kendi yönettiğiniz bir arka uç ve ona ait anahtarlar gerekir. Bu ayarlar mevcut Lovable yayınını veya veritabanını değiştirmez. Menü logosunun göreli görsel yolu Lovable dışında sunulmazsa aynı dosyayı o adreste barındırın.
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+**Yayınlamadan önce:** `/dashboard` mevcut haliyle giriş istemez. Herkese açık bir yayın yaptığınızda yönetim erişimi de herkese açık kalır.
 
-## Development
+## Yerel geliştirme
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Node.js 22.12 veya üstüyle:
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
-npm i
+bun install --frozen-lockfile
 npm run dev
 ```

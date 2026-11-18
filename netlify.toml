@@ -1,0 +1,9 @@
+[build]
+  command = "NITRO_PRESET=netlify npm run build"
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"
+
+# Nitro registers its internal function on /* and serves static files first.
+# A static index.html fallback would intercept server functions and API routes.

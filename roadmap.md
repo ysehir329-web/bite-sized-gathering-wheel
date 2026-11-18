@@ -22,3 +22,7 @@ Yayınlama istendi. QR kodu yayın için belirlenen misafir menüsü adresini ku
 - [x] Çarkı menüyle aynı görünümde, ayrı sayfa yüklemeden hızlı açma ve telefon kontrolü
 - [x] Güvenlik: yorumlar gizli, çark hilesine karşı sunucu sınırı ve ödül kodları, fotoğraf yükleme sunucuda kontrollü
 - [ ] Yönetim paneline Gmail ile giriş (sonra yapılacak)
+
+## Yayın taşınabilirliği
+- [x] Vercel ve Netlify hedefleri, IP başlığı sırası ve ortam değişkeni rehberi
+- [ ] Vercel ve Netlify üzerinde canlı doğrulama (harici yayın ve sunucu anahtarları gerekir)

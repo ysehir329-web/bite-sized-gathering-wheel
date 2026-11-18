@@ -30,6 +30,8 @@ use the editor.
 <!-- LOVABLE:END -->
 ## Application architecture
 
+- Use the existing Lovable Vite wrapper to select Nitro deployment targets; let each Nitro preset generate its server routing so SSR, server functions, and public APIs stay on the same handler.
+
 - Keep menu management at `/dashboard`; menu item/category functions use the publishable key with menu-table RLS, while comments, wheel admin, prize codes and photo uploads go through `managementDb` (src/lib/admin-middleware.ts, service role) because their tables/storage are locked to anon. The panel has no sign-in yet: the future owner sign-in check belongs in that one middleware so every management function is gated at once.
 - Keep the guest menu at `/` and filter out unavailable products in its server function; the QR code must target this public menu, never the management or sign-in page.
 - Resolve QR destinations to the current public origin, with the verified deployment URL as the editor-preview fallback; this prevents printed codes from pointing to an editor sign-in wall.
